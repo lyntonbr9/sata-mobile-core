@@ -1,4 +1,4 @@
-package br.com.br.sata.mobile.core.util;
+package br.com.lle.sata.mobile.core.util;
 
 import java.sql.Date;
 import java.text.DateFormat;

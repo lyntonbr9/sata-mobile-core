@@ -1,13 +1,13 @@
-package br.com.br.sata.mobile.core.robo;
+package br.com.lle.sata.mobile.core.robo;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 
-import br.com.br.sata.mobile.core.http.HTTPSata;
-import br.com.br.sata.mobile.core.interfaces.IBuscaCotacao;
-import br.com.br.sata.mobile.core.to.CotacaoAtivoTO;
+import br.com.lle.sata.mobile.core.http.HTTPSata;
+import br.com.lle.sata.mobile.core.interfaces.IBuscaCotacao;
+import br.com.lle.sata.mobile.core.to.CotacaoAtivoTO;
 
 public class BuscaCotacao implements IBuscaCotacao {
 	

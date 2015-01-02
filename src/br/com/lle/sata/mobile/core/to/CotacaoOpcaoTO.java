@@ -1,4 +1,4 @@
-package br.com.br.sata.mobile.core.to;
+package br.com.lle.sata.mobile.core.to;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

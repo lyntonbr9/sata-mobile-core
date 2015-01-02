@@ -1,4 +1,4 @@
-package br.com.br.sata.mobile.core.http;
+package br.com.lle.sata.mobile.core.http;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

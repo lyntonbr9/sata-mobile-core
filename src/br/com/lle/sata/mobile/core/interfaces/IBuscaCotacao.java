@@ -1,4 +1,4 @@
-package br.com.br.sata.mobile.core.interfaces;
+package br.com.lle.sata.mobile.core.interfaces;
 
 public interface IBuscaCotacao {
 	
