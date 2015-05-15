@@ -26,8 +26,6 @@ public class HTTPSata {
 //			if (SATAUtil.isAmbienteDesenvolvimento()) {
 //				System.setProperty("http.proxyHost", "proxyad.br-petrobras.com.br");
 //				System.setProperty("http.proxyPort", "9090");
-//				System.setProperty("https.proxyHost", "proxyad.br-petrobras.com.br");
-//				System.setProperty("https.proxyPort", "9090");
 //			}
 			
 			URL url;
@@ -130,8 +128,6 @@ public class HTTPSata {
 //			if (SATAUtil.isAmbienteDesenvolvimento()) {
 //				System.setProperty("http.proxyHost", "proxyad.br-petrobras.com.br");
 //				System.setProperty("http.proxyPort", "9090");
-//				System.setProperty("https.proxyHost", "proxyad.br-petrobras.com.br");
-//				System.setProperty("https.proxyPort", "9090");
 //			}
 			
 			URL url;

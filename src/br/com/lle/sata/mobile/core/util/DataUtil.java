@@ -29,4 +29,11 @@ public class DataUtil {
 		cal.setTime(data);
 		return cal;
 	}
+	
+	public static String getDataAtualStr(String pattern) {
+		DateFormat formatter = new SimpleDateFormat(pattern);
+		Calendar c = Calendar.getInstance();
+		return formatter.format(c.getTime());
+	}
+	
 }
