@@ -6,6 +6,6 @@ import br.com.lle.sata.mobile.core.to.CotacaoOpcaoTO;
 
 public interface IBuscaCotacaoOpcao {
 	
-	public List<CotacaoOpcaoTO> getCotacoesOpcoes(String codigoAtivo);
+	public List<CotacaoOpcaoTO> getCotacoesOpcoes(String codigoAtivo, boolean ehCall);
 
 }

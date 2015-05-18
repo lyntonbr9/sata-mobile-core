@@ -45,6 +45,8 @@ public class CotacaoOpcaoTO implements Comparable<CotacaoOpcaoTO>, Serializable 
 	private double volatilidadeMensal;
 	
 	private boolean ehATM;
+	
+	private boolean ehCall;
 
 	private int split;
 	
@@ -251,6 +253,14 @@ public class CotacaoOpcaoTO implements Comparable<CotacaoOpcaoTO>, Serializable 
 
 	public void setEhATM(boolean ehATM) {
 		this.ehATM = ehATM;
+	}
+
+	public boolean isEhCall() {
+		return ehCall;
+	}
+
+	public void setEhCall(boolean ehCall) {
+		this.ehCall = ehCall;
 	}
 	
 	/**

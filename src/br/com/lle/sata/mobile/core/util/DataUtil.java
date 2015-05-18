@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class DataUtil {
+public class DataUtil { 
 
 	public static int getDiferencaDias(Date dia1, Date dia2) {
 		return getDiferencaDias(converteToCalendar(dia1), converteToCalendar(dia2));
@@ -19,8 +19,8 @@ public class DataUtil {
 	}
 	
 	public static Date converteToDate(String data) throws ParseException {
-		DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-		java.util.Date dataUtil = formatter.parse(data);
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+		java.util.Date dataUtil = df.parse(data);
 		return new Date(dataUtil.getTime()); 
 	}
 	
@@ -31,9 +31,30 @@ public class DataUtil {
 	}
 	
 	public static String getDataAtualStr(String pattern) {
-		DateFormat formatter = new SimpleDateFormat(pattern);
-		Calendar c = Calendar.getInstance();
-		return formatter.format(c.getTime());
+		DateFormat df = new SimpleDateFormat(pattern);
+		return df.format(Calendar.getInstance().getTime());
+	}
+	
+	public static Date getDataAtual() {
+		java.util.Date dataAtual = Calendar.getInstance().getTime(); 
+		return new Date(dataAtual.getTime());
+	}
+	
+	public static String format(Date data, String pattern) {
+		DateFormat df = new SimpleDateFormat(pattern);
+		return df.format(converteToCalendar(data).getTime());
+	}
+	
+	public static Date addDays(Date data, int dias) {
+		Calendar cal = converteToCalendar(data);
+		cal.add(Calendar.DAY_OF_MONTH, dias);
+		return new Date(cal.getTime().getTime());
+	}
+	
+	public static Date addDays(int dias) {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, dias);
+		return new Date(cal.getTime().getTime());
 	}
 	
 }
