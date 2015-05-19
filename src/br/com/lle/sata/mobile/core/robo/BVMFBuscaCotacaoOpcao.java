@@ -125,7 +125,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		if (cotacoesOpcoes.size() > 0) {
 			Collections.sort(cotacoesOpcoes, new CotacaoOpcaoVolumeComparator());
 			for (CotacaoOpcaoTO co : cotacoesOpcoes) {
-				System.out.println("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume());
+				System.out.println("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
 			} 
 		}
 	}
@@ -151,7 +151,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">",19));
 					int volume = getVolumeFromHtml(htmlOpcao);
 					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
-					if (volume >= 1000000 && !codOpcao.contains(" E")) {
+					if (volume >= 1000000 && !codOpcao.contains(" E") && isDataOpcaoValida(dataSerie)) {
 						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
 						co.setCodigo(codOpcao);
 						co.setPrecoExercicio(String.valueOf(precoExercicio));
@@ -168,6 +168,16 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		ordenarCotacoes(cotacoesOpcoes);
 		
 		return cotacoesOpcoes;
+	}
+	
+	private boolean isDataOpcaoValida(String dataSerie) {
+		try {
+			return (DataUtil.getDiferencaDias(DataUtil.getDataAtual(), DataUtil.converteToDate(dataSerie)) >= 0);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	public List<CotacaoOpcaoTO> getCotacoesOpcoesVenda(String html) {
@@ -192,7 +202,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">",19));
 					int volume = getVolumeFromHtml(htmlOpcao);
 					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
-					if (volume >= 1000000) {
+					if (volume >= 1000000 && isDataOpcaoValida(dataSerie)) {
 						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
 						co.setCodigo(codOpcao.replace(" E", ""));
 						co.setPrecoExercicio(String.valueOf(precoExercicio));
