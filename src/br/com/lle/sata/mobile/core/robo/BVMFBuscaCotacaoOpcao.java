@@ -30,6 +30,14 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		nomeEmpresas = new HashMap<String, String>();
 		nomeEmpresas.put("PETR4", "PETROBRAS");
 		nomeEmpresas.put("VALE5", "VALE");
+		nomeEmpresas.put("ABEV3", "AMBEV");
+		nomeEmpresas.put("BBAS3", "BRASIL");
+		nomeEmpresas.put("BBDC4", "BRADESCO");
+		nomeEmpresas.put("BVMF3", "BMFBOVESPA");
+		nomeEmpresas.put("ITUB4", "ITAUUNIBANCO");
+		nomeEmpresas.put("CYRE3", "CYRELA");
+		nomeEmpresas.put("USIM5", "USIMINAS");
+		nomeEmpresas.put("ESTC3", "ESTACIO");
 	}
 
 	@Override
