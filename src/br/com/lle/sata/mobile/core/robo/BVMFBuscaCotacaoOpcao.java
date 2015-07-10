@@ -1,5 +1,9 @@
 package br.com.lle.sata.mobile.core.robo;
 
+import static br.com.lle.sata.util.LogUtil.log;
+import static br.com.lle.sata.util.StringUtil.concat;
+import static br.com.lle.sata.util.StringUtil.removeExcessoEspacos;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -13,8 +17,8 @@ import br.com.lle.sata.mobile.core.http.HTTPSata;
 import br.com.lle.sata.mobile.core.interfaces.IBuscaCotacaoOpcao;
 import br.com.lle.sata.mobile.core.to.CotacaoOpcaoTO;
 import br.com.lle.sata.mobile.core.to.comparator.CotacaoOpcaoVolumeComparator;
-import br.com.lle.sata.mobile.core.util.DataUtil;
-import br.com.lle.sata.mobile.core.util.StringUtil;
+import br.com.lle.sata.util.DataUtil;
+
 
 public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	
@@ -43,16 +47,17 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	@Override
 	public List<CotacaoOpcaoTO> getCotacoesOpcoes(String codigoAtivo, boolean ehCall) {
 		
-		if (codigoAtivo == null) throw new IllegalArgumentException("Parametro codigoAtivo eh null."); 
+		if (codigoAtivo == null) throw new IllegalArgumentException("Parametro codigoAtivo nao pode ser null"); 
 			
 		List<CotacaoOpcaoTO> cotacoesOpcoes = new ArrayList<CotacaoOpcaoTO>();
 	
 		String nomeEmpresa = this.nomeEmpresas.get(codigoAtivo);
-		// remove dois dias da data atual
-		Date dataPesq = DataUtil.addDays(-4);
+		
+		// remove dias da data atual para a pesquisa
+		Date dataPesq = DataUtil.addDays(-10);
 		// formata para str
 		String dataPesquisa = DataUtil.format(dataPesq, "yyyy-MM-dd");
-//		String dataPesquisa = "2015-05-08";
+//		String dataPesquisa = "2015-07-01";
 		
 		Hashtable h = new Hashtable();
 //			h.put("__EVENTTARGET","ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$lnkLetraP");
@@ -65,57 +70,21 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$", "rbTodos");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$cmbVcto","0");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData", dataPesquisa);
-		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData$dateInput", dataPesquisa + "-00-00-00");
+		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData$dateInput", concat(dataPesquisa, "-00-00-00"));
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaData_txtConsultaData_calendar_SD","[]");
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaData_txtConsultaData_calendar_AD","[[2015,3,12],[2015,5,8],[2015,5,8]]");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaEmpresa", nomeEmpresa);
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload", dataPesquisa);
-		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload$dateInput", dataPesquisa + "-00-00-00");
+		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload$dateInput", concat(dataPesquisa, "-00-00-00"));
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaDataDownload_txtConsultaDataDownload_calendar_SD","[]");
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaDataDownload_txtConsultaDataDownload_calendar_AD","[[2015,3,12],[2015,5,8],[2015,5,8]]");
 		h.put("ctl00$contentPlaceHolderConteudo$mpgOpcoes_Selected","0");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$btnBuscarEmpresa","buscar");
 
-		String html = StringUtil.removeExcessoEspacos(HTTPSata.POST(URL_COTACAO_OPCAO, h));
+		String html = removeExcessoEspacos(HTTPSata.POST(URL_COTACAO_OPCAO, h));
 		
 		cotacoesOpcoes = (ehCall) ? getCotacoesOpcoesCompra(html) : getCotacoesOpcoesVenda(html);
 
-		/*
-		int corte = html.indexOf("de Compra</h2>");
-		if (corte > -1) {
-			html = html.substring(corte, html.indexOf("de Venda</h2>"));
-			
-			int corteSerie = html.indexOf(TIPO_ACAO);
-			do {
-				String htmlSerie = html.substring(corteSerie);
-				String dataSerie = htmlSerie.substring(htmlSerie.indexOf("Vencimento:")+11, htmlSerie.indexOf("</a>")).trim();
-				System.out.println("dataSerie="+dataSerie);
-				htmlSerie = htmlSerie.substring(htmlSerie.indexOf("<td align=\"center\">"),htmlSerie.indexOf("</li>"));
-				int corteOpcao = 0;
-				do {
-					String htmlOpcao = htmlSerie.substring(corteOpcao+19, htmlSerie.indexOf("</tr>", corteOpcao));
-					String codOpcao = htmlOpcao.substring(0, htmlOpcao.indexOf("</td>")).trim();
-					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">"));
-					BigDecimal precoExercicio = new BigDecimal(htmlOpcao.substring(18,htmlOpcao.indexOf("</td>")).trim().replace(",", "."));
-					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">",19));
-					int coberto = Integer.parseInt(htmlOpcao.substring(18,htmlOpcao.indexOf("</td>")).trim().replace(".", ""));
-					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
-					if (coberto != 0 && !codOpcao.contains(" E")) {
-						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
-						co.setCodigo(codOpcao);
-						co.setCodigoAcao(codigoAtivo);
-						co.setPrecoExercicio(String.valueOf(precoExercicio));
-						co.setDataVencimento(dataSerie);
-						co.setVolume(String.valueOf(coberto));
-						cotacoesOpcoes.add(co);
-						System.out.println("codOpcao="+codOpcao+"; precoEx="+precoExercicio+"; coberto="+coberto);
-					}
-				} while(corteOpcao > -1);
-
-				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
-			} while (corteSerie > -1);
-		}
-		*/
 		return cotacoesOpcoes;
 	}
 
@@ -133,7 +102,8 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		if (cotacoesOpcoes.size() > 0) {
 			Collections.sort(cotacoesOpcoes, new CotacaoOpcaoVolumeComparator());
 			for (CotacaoOpcaoTO co : cotacoesOpcoes) {
-				System.out.println("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
+//				log("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
+				log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
 			} 
 		}
 	}
@@ -148,7 +118,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 			do {
 				String htmlSerie = html.substring(corteSerie);
 				String dataSerie = htmlSerie.substring(htmlSerie.indexOf("Vencimento:")+11, htmlSerie.indexOf("</a>")).trim();
-				//System.out.println("dataSerie="+dataSerie);
+				//log("dataSerie="+dataSerie);
 				htmlSerie = htmlSerie.substring(htmlSerie.indexOf("<td align=\"center\">"),htmlSerie.indexOf("</li>"));
 				int corteOpcao = 0;
 				do {
@@ -199,7 +169,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 			do {
 				String htmlSerie = html.substring(corteSerie);
 				String dataSerie = htmlSerie.substring(htmlSerie.indexOf("Vencimento:")+11, htmlSerie.indexOf("</a>")).trim();
-				//System.out.println("dataSerie="+dataSerie);
+				//log("dataSerie="+dataSerie);
 				htmlSerie = htmlSerie.substring(htmlSerie.indexOf("<td align=\"center\">"),htmlSerie.indexOf("</li>"));
 				int corteOpcao = 0;
 				do {
@@ -231,8 +201,8 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
-//		bco.getCotacoesOpcoes("VALE5", false);
-		bco.getCotacoesOpcoes("PETR4", false);
+		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", true);
+		log(String.valueOf(cotacoes.size()));
 	}
 	
 }

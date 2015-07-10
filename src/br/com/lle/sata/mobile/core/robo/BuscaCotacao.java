@@ -1,5 +1,8 @@
 package br.com.lle.sata.mobile.core.robo;
 
+import static br.com.lle.sata.util.LogUtil.log;
+import static br.com.lle.sata.util.StringUtil.concat;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -22,7 +25,8 @@ public class BuscaCotacao implements IBuscaCotacao {
 	public String getCotacao(String codigo) {
 		
 		Hashtable<String, String> h = new Hashtable<String, String>();
-		String url = "http://br.advfn.com/bolsa-de-valores/bovespa/" + codigo.toUpperCase() +"/cotacao";
+//		String url = "http://br.advfn.com/bolsa-de-valores/bovespa/" + codigo.toUpperCase() +"/cotacao";
+		String url = concat("http://br.advfn.com/bolsa-de-valores/bovespa/", codigo.toUpperCase(), "/cotacao");
 		String html = HTTPSata.GET(url, h);	
 		// recupera a ultima cotacao - quoteElementPiece6
 		return getValor(html, "quoteElementPiece6");
@@ -30,7 +34,7 @@ public class BuscaCotacao implements IBuscaCotacao {
 	
 	public CotacaoAtivoTO getCotacaoAtivo(String codigo) {
 		CotacaoAtivoTO cotacaoAtivo = new CotacaoAtivoTO();
-		String url = "http://br.advfn.com/bolsa-de-valores/bovespa/" + codigo.toUpperCase() +"/cotacao";
+		String url = concat("http://br.advfn.com/bolsa-de-valores/bovespa/", codigo.toUpperCase(), "/cotacao");
 		String html = HTTPSata.GET(url, null);
 		// quoteElementPiece7 - maxima
 		cotacaoAtivo.setMaxima(getValor(html, "quoteElementPiece7").replace(",", ""));
@@ -76,9 +80,7 @@ public class BuscaCotacao implements IBuscaCotacao {
 	public static void main(String[] args) {
 		BuscaCotacao bc = new BuscaCotacao();
 		String cotacao = bc.getCotacao("PETRH20");
-		System.out.println(cotacao);
-//		CotacaoAtivoTO cotacaoAtivo = bc.getCotacaoAtivo("PETRH20");
-//		System.out.println(cotacaoAtivo);
+		log(cotacao);
 	}
 	
 }
