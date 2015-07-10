@@ -1,20 +1,11 @@
 package br.com.lle;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class App 
 {
     public static void main( String[] args )
     {
-        System.out.println( "Sending POST to GCM" );
+        System.out.println("Sending POST to GCM");
 
         String apiKey = "AIzaSyAJkI3UGZ2u6hlj3uAIpPFhnJ4X29q5bgw";
         Content content = createContent();

@@ -1,5 +1,7 @@
 package br.com.lle.sata.mobile.core.to;
 
+import static br.com.lle.sata.mobile.core.util.StringUtil.concat;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -51,7 +53,7 @@ public class CotacaoOpcaoTO implements Comparable<CotacaoOpcaoTO>, Serializable 
 	private int split;
 	
 	public String getId() {
-		return codigo + "-" + periodo;
+		return concat(codigo, "-", periodo);
 	}
 
 	public BigDecimal getValorFechamento() {
@@ -102,7 +104,7 @@ public class CotacaoOpcaoTO implements Comparable<CotacaoOpcaoTO>, Serializable 
 	
 	@Override
 	public String toString() {
-		return codigo + " " + periodo + " = " + fechamento;
+		return concat(codigo, " ", periodo, " = ", fechamento);
 	}
 	
 	public double getVolatilidadeAnual() {

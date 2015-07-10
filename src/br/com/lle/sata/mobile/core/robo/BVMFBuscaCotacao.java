@@ -1,5 +1,7 @@
 package br.com.lle.sata.mobile.core.robo;
 
+import static br.com.lle.sata.mobile.core.util.StringUtil.concat;
+
 import java.util.Hashtable;
 
 import br.com.lle.sata.mobile.core.http.HTTPSata;
@@ -21,7 +23,7 @@ public class BVMFBuscaCotacao implements IBuscaCotacao {
 	public String getCotacao(String codigo) {
 		
 		Hashtable<String, String> h = new Hashtable<String, String>();
-		String url = URL_COTACAO + codigo.toUpperCase();
+		String url = concat(URL_COTACAO, codigo.toUpperCase());
 		String html = HTTPSata.GET(url, h);	
 		// recupera a ultima cotacao
 		return getValor(html, "Ultimo");

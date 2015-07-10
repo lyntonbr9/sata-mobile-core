@@ -1,5 +1,7 @@
 package br.com.lle;
 
+import static br.com.lle.sata.mobile.core.util.StringUtil.concat;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,8 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class POST2GCM {
@@ -53,8 +55,8 @@ public class POST2GCM {
 
             // 6. Get the response
             int responseCode = conn.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
+            System.out.println(concat("\nSending 'POST' request to URL : ", url));
+            System.out.println(concat("Response Code : ", responseCode));
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(conn.getInputStream()));

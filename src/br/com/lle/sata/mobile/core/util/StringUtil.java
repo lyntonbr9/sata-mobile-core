@@ -12,4 +12,15 @@ public class StringUtil {
 	    String res = matcher.replaceAll(" ").trim();
 	    return res;
 	}
+	
+	public static String concat(Object... objs) {
+		if (objs == null)
+			throw new IllegalArgumentException("Os parametros nao podem ser nulos");
+		StringBuffer sb = new StringBuffer();
+		for (Object object : objs) {
+			sb.append(object.toString());
+		}
+	    return sb.toString();
+	}
+	
 }

@@ -1,5 +1,7 @@
 package br.com.lle.sata.mobile.core.http;
 
+import static br.com.lle.sata.mobile.core.util.StringUtil.concat;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
@@ -23,20 +25,16 @@ public class HTTPSata {
 	 */
 	public static String POST(String targetURL, Hashtable<String, String> contentHash) {
 		try {
-//			if (SATAUtil.isAmbienteDesenvolvimento()) {
-//				System.setProperty("http.proxyHost", "proxyad.br-petrobras.com.br");
-//				System.setProperty("http.proxyPort", "9090");
-//			}
+			setProxyProperties();
 			
 			URL url;
 			HttpURLConnection conn;
-
 			// The data streams used to read from and write to the URL connection.
 			DataOutputStream out;
 			DataInputStream in;
 
 			// String returned as the result of the POST.
-			String returnString = "";
+			String resultado = "";
 
 			// Create the URL object and make a connection to it.
 			url = new URL(targetURL);
@@ -73,11 +71,11 @@ public class HTTPSata {
 				// If this is not the first key-value pair in the hashtable,
 				// concantenate an "&" sign to the constructed String
 				if (!first) {
-					content += "&";
+					content = concat(content, "&");
 				}
 					
 				// append to a single string. Encode the value portion
-				content += (String) key + "=" + URLEncoder.encode((String) value, "UTF-8");
+				content = concat(content, key, "=", URLEncoder.encode((String) value, "UTF-8"));
 
 				first = false;
 			}
@@ -93,17 +91,17 @@ public class HTTPSata {
 			// Read the input stream
 			Scanner sc = new Scanner(in);
 			while(sc.hasNextLine()) {
-				returnString += sc.nextLine() + "\n";
+				resultado = concat(resultado, sc.nextLine(), "\n");
 			}
 
 			in.close();
 			sc.close();
 			
 			// faz a conversão de UTF-8 para ISO-8859-1 por causa da acentuacao
-			String respostaUTF8 = new String(returnString.getBytes(), "UTF-8");
-			returnString = new String(respostaUTF8.getBytes(), "ISO-8859-1");
+			String respostaUTF8 = new String(resultado.getBytes(), "UTF-8");
+			resultado = new String(respostaUTF8.getBytes(), "ISO-8859-1");
 			// return the string that was read.
-			return returnString;
+			return resultado;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -125,14 +123,10 @@ public class HTTPSata {
 		// String returned as the result of the GET.
 		String content = "";
 		try {
-//			if (SATAUtil.isAmbienteDesenvolvimento()) {
-//				System.setProperty("http.proxyHost", "proxyad.br-petrobras.com.br");
-//				System.setProperty("http.proxyPort", "9090");
-//			}
+			setProxyProperties();
 			
 			URL url;
 			HttpURLConnection conn;
-
 			// The data streams used to read from and write to the URL connection.
 			DataInputStream in;
 
@@ -158,7 +152,7 @@ public class HTTPSata {
 			// Read the input stream
 			Scanner sc = new Scanner(in);
 			while(sc.hasNextLine()) {
-				content += sc.nextLine() + "\n";
+				content = concat(content, sc.nextLine(), "\n");
 			}
 			// close the streams
 			in.close();
@@ -170,9 +164,17 @@ public class HTTPSata {
 		return content;
 	}
 	
+	private static void setProxyProperties() {
+//		if (SATAUtil.isAmbienteDesenvolvimento()) {
+//			System.setProperty("http.proxyHost", "proxyad.br-petrobras.com.br");
+//			System.setProperty("http.proxyPort", "9090");
+//		}
+		
+	}
+	
 	public static void main(String[] args) {
 		String ativo = "PETRH20";
-		String urlCotacao = "http://br.advfn.com/bolsa-de-valores/bovespa/" + ativo +"/cotacao";
+		String urlCotacao = concat("http://br.advfn.com/bolsa-de-valores/bovespa/", ativo, "/cotacao");
 		String html = HTTPSata.GET(urlCotacao, null);
 		System.out.println(html);
 	}

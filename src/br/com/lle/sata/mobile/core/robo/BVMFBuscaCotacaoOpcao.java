@@ -1,5 +1,7 @@
 package br.com.lle.sata.mobile.core.robo;
 
+import static br.com.lle.sata.mobile.core.util.StringUtil.concat;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -43,16 +45,17 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	@Override
 	public List<CotacaoOpcaoTO> getCotacoesOpcoes(String codigoAtivo, boolean ehCall) {
 		
-		if (codigoAtivo == null) throw new IllegalArgumentException("Parametro codigoAtivo eh null."); 
+		if (codigoAtivo == null) throw new IllegalArgumentException("Parametro codigoAtivo nao pode ser null"); 
 			
 		List<CotacaoOpcaoTO> cotacoesOpcoes = new ArrayList<CotacaoOpcaoTO>();
 	
 		String nomeEmpresa = this.nomeEmpresas.get(codigoAtivo);
-		// remove dois dias da data atual
-		Date dataPesq = DataUtil.addDays(-4);
+		
+		// remove 15 dias da data atual
+		Date dataPesq = DataUtil.addDays(-15);
 		// formata para str
 		String dataPesquisa = DataUtil.format(dataPesq, "yyyy-MM-dd");
-//		String dataPesquisa = "2015-05-08";
+//		String dataPesquisa = "2015-07-01";
 		
 		Hashtable h = new Hashtable();
 //			h.put("__EVENTTARGET","ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$lnkLetraP");
@@ -65,12 +68,12 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$", "rbTodos");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$cmbVcto","0");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData", dataPesquisa);
-		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData$dateInput", dataPesquisa + "-00-00-00");
+		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaData$txtConsultaData$dateInput", concat(dataPesquisa, "-00-00-00"));
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaData_txtConsultaData_calendar_SD","[]");
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaData_txtConsultaData_calendar_AD","[[2015,3,12],[2015,5,8],[2015,5,8]]");
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaEmpresa", nomeEmpresa);
 		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload", dataPesquisa);
-		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload$dateInput", dataPesquisa + "-00-00-00");
+		h.put("ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$txtConsultaDataDownload$txtConsultaDataDownload$dateInput", concat(dataPesquisa, "-00-00-00"));
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaDataDownload_txtConsultaDataDownload_calendar_SD","[]");
 //			h.put("ctl00_contentPlaceHolderConteudo_posicoesAbertoEmp_txtConsultaDataDownload_txtConsultaDataDownload_calendar_AD","[[2015,3,12],[2015,5,8],[2015,5,8]]");
 		h.put("ctl00$contentPlaceHolderConteudo$mpgOpcoes_Selected","0");
@@ -133,7 +136,8 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		if (cotacoesOpcoes.size() > 0) {
 			Collections.sort(cotacoesOpcoes, new CotacaoOpcaoVolumeComparator());
 			for (CotacaoOpcaoTO co : cotacoesOpcoes) {
-				System.out.println("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
+//				System.out.println("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
+				System.out.println(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
 			} 
 		}
 	}
@@ -232,7 +236,8 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
 //		bco.getCotacoesOpcoes("VALE5", false);
-		bco.getCotacoesOpcoes("PETR4", false);
+		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", true);
+		System.out.println(cotacoes.size());
 	}
 	
 }
