@@ -7,6 +7,7 @@ import static br.com.lle.sata.util.StringUtil.removeExcessoEspacos;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -30,10 +31,57 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	
 	private Map<String, String> nomeEmpresas;
 	
+	// define a quantidade de vencimentos que vai recuperar
+	private int MAX_QTD_SERIES_VENCIMENTOS = 2;
+	
+	// define o menor volume da opcao
+	private int MIN_QTD_VOLUME_CALL = 1000000;
+	
+	// define o menor volume da opcao
+	private int MIN_QTD_VOLUME_PUT = 200000;
+	
+	/*
+	private static VencimentoOpcaoTO vencimentoOpcoes;
+	
+	static {
+		recuperarVencimentoOpcoes();
+	}
+	
+	private static void recuperarVencimentoOpcoes() {
+		vencimentoOpcoes = new VencimentoOpcaoTO();
+		vencimentoOpcoes.setA("18/01/2016");
+		vencimentoOpcoes.setB("15/02/2016");
+		vencimentoOpcoes.setC("21/03/2016");
+		vencimentoOpcoes.setD("18/04/2016");
+		vencimentoOpcoes.setE("16/05/2016");
+		vencimentoOpcoes.setF("20/06/2016");
+		vencimentoOpcoes.setG("18/07/2016");
+		vencimentoOpcoes.setH("15/08/2016");
+		vencimentoOpcoes.setI("19/09/2016");
+		vencimentoOpcoes.setJ("17/10/2016");
+		vencimentoOpcoes.setK("21/11/2016");
+		vencimentoOpcoes.setL("19/12/2016");
+		
+		vencimentoOpcoes.setM(vencimentoOpcoes.getA());
+		vencimentoOpcoes.setN(vencimentoOpcoes.getB());
+		vencimentoOpcoes.setO(vencimentoOpcoes.getC());
+		vencimentoOpcoes.setP(vencimentoOpcoes.getD());
+		vencimentoOpcoes.setQ(vencimentoOpcoes.getE());
+		vencimentoOpcoes.setR(vencimentoOpcoes.getF());
+		vencimentoOpcoes.setS(vencimentoOpcoes.getG());
+		vencimentoOpcoes.setT(vencimentoOpcoes.getH());
+		vencimentoOpcoes.setU(vencimentoOpcoes.getI());
+		vencimentoOpcoes.setV(vencimentoOpcoes.getJ());
+		vencimentoOpcoes.setW(vencimentoOpcoes.getK());
+		vencimentoOpcoes.setX(vencimentoOpcoes.getL());
+	}
+	*/
+	
 	public BVMFBuscaCotacaoOpcao() {
 		nomeEmpresas = new HashMap<String, String>();
 		nomeEmpresas.put("PETR4", "PETROBRAS");
 		nomeEmpresas.put("VALE5", "VALE");
+		/*
 		nomeEmpresas.put("ABEV3", "AMBEV");
 		nomeEmpresas.put("BBAS3", "BRASIL");
 		nomeEmpresas.put("BBDC4", "BRADESCO");
@@ -42,6 +90,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		nomeEmpresas.put("CYRE3", "CYRELA");
 		nomeEmpresas.put("USIM5", "USIMINAS");
 		nomeEmpresas.put("ESTC3", "ESTACIO");
+		*/
 	}
 
 	@Override
@@ -101,16 +150,70 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	private void ordenarCotacoes(List<CotacaoOpcaoTO> cotacoesOpcoes) {
 		if (cotacoesOpcoes.size() > 0) {
 			Collections.sort(cotacoesOpcoes, new CotacaoOpcaoVolumeComparator());
-			for (CotacaoOpcaoTO co : cotacoesOpcoes) {
-//				log("codOpcao="+co.getCodigo()+"; precoEx="+co.getPrecoExercicio()+"; volume="+co.getVolume() +"; dataVencimento="+co.getDataVencimento());
-				log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
-			} 
 		}
 	}
 	
 	public List<CotacaoOpcaoTO> getCotacoesOpcoesCompra(String html) {
 		List<CotacaoOpcaoTO> cotacoesOpcoes = new ArrayList<CotacaoOpcaoTO>();
 		
+		// encontra onde comecam as opcoes de compra
+		int corte = html.indexOf("de Compra</h2>");
+		// se encontrou
+		if (corte > -1) {
+			// faz um corte no html que tem todas as series de opcoes
+			html = html.substring(corte, html.indexOf("de Venda</h2>"));
+			// define o tipo de acao que vai recuperar as series
+			int corteSerie = html.indexOf(TIPO_ACAO);
+			// contador de qts series vencimentos ja recuperou
+			int contadorSeriesVenc = 0;
+			// recupera o mes atual com indice defasado
+			int mesAtual = Calendar.getInstance().get(Calendar.MONTH);
+			// avanca para o mes atual
+			while (mesAtual > 0) {
+				// anda com o corte para a serie com a proxima data vencimento
+				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
+				mesAtual--;
+			};
+			// para cada vencimento ate a quantidade maxima de series a recuperar
+			do {
+				int indiceVenc = html.indexOf("Vencimento:", corteSerie)+11;
+				int indiceFimDataSerie =  html.indexOf("</a>", indiceVenc);
+				String dataSerie = html.substring(indiceVenc, indiceFimDataSerie).trim();
+				String htmlSerie = html.substring(html.indexOf("<td align=\"center\">", indiceFimDataSerie),html.indexOf("</li>", indiceFimDataSerie));
+				int corteOpcao = 0;
+				// para cada opcao da serie
+				do {
+					// recupera a string com os dados da opcao
+					String htmlOpcao = htmlSerie.substring(corteOpcao+19, htmlSerie.indexOf("</tr>", corteOpcao));
+					// recupera o codigo da opcao
+					String codOpcao = htmlOpcao.substring(0, htmlOpcao.indexOf("</td>")).trim();
+					// altera a string
+					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">"));
+					// recupera o preco de exercicio
+					BigDecimal precoExercicio = new BigDecimal(htmlOpcao.substring(18,htmlOpcao.indexOf("</td>")).trim().replace(",", "."));
+					// altera a string
+					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">", 19));
+					// recupera o volume
+					int volume = getVolumeFromHtml(htmlOpcao);
+					if (volume >= MIN_QTD_VOLUME_CALL && !codOpcao.contains(" E") && isDataOpcaoValida(dataSerie)) {
+						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
+						co.setCodigo(codOpcao);
+						co.setPrecoExercicio(String.valueOf(precoExercicio));
+						co.setDataVencimento(dataSerie);
+						co.setVolume(String.valueOf(volume));
+						co.setEhCall(true);
+						cotacoesOpcoes.add(co);
+					}
+					// recupera o indice para a proxima opcao
+					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
+				} while(corteOpcao > -1);
+				// calcula para a proxima data vencimento
+				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
+				// incrementa a quantidade de series recuperadas
+				contadorSeriesVenc++;
+			} while (contadorSeriesVenc < MAX_QTD_SERIES_VENCIMENTOS);
+		}
+		/*
 		int corte = html.indexOf("de Compra</h2>");
 		if (corte > -1) {
 			html = html.substring(corte, html.indexOf("de Venda</h2>"));
@@ -118,7 +221,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 			do {
 				String htmlSerie = html.substring(corteSerie);
 				String dataSerie = htmlSerie.substring(htmlSerie.indexOf("Vencimento:")+11, htmlSerie.indexOf("</a>")).trim();
-				//log("dataSerie="+dataSerie);
+				log("dataSerie="+dataSerie);
 				htmlSerie = htmlSerie.substring(htmlSerie.indexOf("<td align=\"center\">"),htmlSerie.indexOf("</li>"));
 				int corteOpcao = 0;
 				do {
@@ -130,6 +233,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 					int volume = getVolumeFromHtml(htmlOpcao);
 					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
 					if (volume >= 1000000 && !codOpcao.contains(" E") && isDataOpcaoValida(dataSerie)) {
+					//if (volume >= 1000000 && !codOpcao.contains(" E")) {
 						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
 						co.setCodigo(codOpcao);
 						co.setPrecoExercicio(String.valueOf(precoExercicio));
@@ -142,6 +246,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
 			} while (corteSerie > -1);
 		}
+		*/
 		
 		ordenarCotacoes(cotacoesOpcoes);
 		
@@ -158,10 +263,70 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		return false;
 	}
 	
+	
 	public List<CotacaoOpcaoTO> getCotacoesOpcoesVenda(String html) {
 		
 		List<CotacaoOpcaoTO> cotacoesOpcoes = new ArrayList<CotacaoOpcaoTO>();
 		
+		// encontra onde comecam as opcoes de venda
+		int corte = html.indexOf("de Venda</h2>");;
+		// se encontrou
+		if (corte > -1) {
+			// faz um corte no html que tem todas as series de opcoes
+			html = html.substring(corte, html.indexOf("Estilo Europeu"));
+			// define o tipo de acao que vai recuperar as series
+			int corteSerie = html.indexOf(TIPO_ACAO);
+			// contador de qts series vencimentos ja recuperou
+			int contadorSeriesVenc = 0;
+			// recupera o mes atual com indice defasado
+			int mesAtual = Calendar.getInstance().get(Calendar.MONTH);
+			// avanca para o mes atual
+			while (mesAtual > 0) {
+				// anda com o corte para a serie com a proxima data vencimento
+				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
+				mesAtual--;
+			};
+			// para cada vencimento ate a quantidade maxima de series a recuperar
+			do {
+				int indiceVenc = html.indexOf("Vencimento:", corteSerie)+11;
+				int indiceFimDataSerie =  html.indexOf("</a>", indiceVenc);
+				String dataSerie = html.substring(indiceVenc, indiceFimDataSerie).trim();
+				String htmlSerie = html.substring(html.indexOf("<td align=\"center\">", indiceFimDataSerie),html.indexOf("</li>", indiceFimDataSerie));
+				int corteOpcao = 0;
+				// para cada opcao da serie
+				do {
+					// recupera a string com os dados da opcao
+					String htmlOpcao = htmlSerie.substring(corteOpcao+19, htmlSerie.indexOf("</tr>", corteOpcao));
+					// recupera o codigo da opcao
+					String codOpcao = htmlOpcao.substring(0, htmlOpcao.indexOf("</td>")).trim();
+					// altera a string
+					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">"));
+					// recupera o preco de exercicio
+					BigDecimal precoExercicio = new BigDecimal(htmlOpcao.substring(18,htmlOpcao.indexOf("</td>")).trim().replace(",", "."));
+					// altera a string
+					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">", 19));
+					// recupera o volume
+					int volume = getVolumeFromHtml(htmlOpcao);
+					if (volume >= MIN_QTD_VOLUME_PUT && isDataOpcaoValida(dataSerie)) {
+						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
+						co.setCodigo(codOpcao.replace(" E", ""));
+						co.setPrecoExercicio(String.valueOf(precoExercicio));
+						co.setDataVencimento(dataSerie);
+						co.setVolume(String.valueOf(volume));
+						co.setEhCall(false);
+						cotacoesOpcoes.add(co);
+					}
+					// recupera o indice para a proxima opcao
+					corteOpcao = htmlSerie.indexOf("<td align=\"center\">",corteOpcao+19);
+				} while(corteOpcao > -1);
+				// calcula para a proxima data vencimento
+				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
+				// incrementa a quantidade de series recuperadas
+				contadorSeriesVenc++;
+			} while (contadorSeriesVenc < MAX_QTD_SERIES_VENCIMENTOS);
+		}
+				
+		/*
 		int corte = html.indexOf("de Venda</h2>");
 		if (corte > -1) {
 			html = html.substring(corte, html.indexOf("Estilo Europeu"));
@@ -193,15 +358,41 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 				corteSerie = html.indexOf(TIPO_ACAO, corteSerie+2);
 			} while (corteSerie > -1);
 		}
+		*/
 		
 		ordenarCotacoes(cotacoesOpcoes);
 		
 		return cotacoesOpcoes;
 	}
 	
+	/*
+	public CotacaoOpcaoTO getCotacaoOpcao(String codigoOpcao) {
+		//String urlInformacaoOpcao = "http://br.advfn.com/common/search/exchanges/qkquote/" + codigoOpcao;
+		String urlInformacaoOpcao = "http://www.dadosdabolsa.com/Opcao/PETR4/" + codigoOpcao;
+		
+		String urlVencimentoOpcoes = "http://www.bmfbovespa.com.br/opcoes/opcoes.aspx?idioma=pt-br&aba=tabVctoOpcoes";
+		
+		Hashtable h = new Hashtable();
+		//h.put("Cookie","OASISID=5691433bddb12; MKTA_THEOASISID=5691433bc477b; i18next=pt; popunder26925Cap=1; ADVFNUID=084b0ab448d6a72c52beb43bbcad41fc2293213b; recent_stocks=BOV%5EPETRN22%2CBOV%5EPETRN52%2CNYM%5ECL%5CX15%2CSSI%5E000001%2CBOV%5EIBOV%2CDJI%5EI%5CDJI%2CNIK%5EN225; OASISCAP_2=a%3A2%3A%7Bi%3A26826%3Ba%3A3%3A%7Bi%3A0%3Bi%3A1%3Bi%3A1%3Bi%3A1453047892%3Bi%3A2%3Bi%3A1453051492%3B%7Di%3A26923%3Ba%3A3%3A%7Bi%3A0%3Bi%3A2%3Bi%3A1%3Bi%3A1453047952%3Bi%3A2%3Bi%3A1453051552%3B%7D%7D; _ga=GA1.2.1456600852.1452360512; _gat=1");
+		String html = removeExcessoEspacos(HTTPSata.GET(urlVencimentoOpcoes, h));
+		
+		System.out.println(html);
+		
+		return null;
+	}
+	
+	public VencimentoOpcaoTO getVencimentosOpcoes() {
+		//return vencimentoOpcoes;
+		return new VencimentoOpcaoTO();
+	}
+	*/
+	
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
-		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", true);
+		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", false);
+		for (CotacaoOpcaoTO co : cotacoes) {
+			log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
+		}
 		log(String.valueOf(cotacoes.size()));
 	}
 	

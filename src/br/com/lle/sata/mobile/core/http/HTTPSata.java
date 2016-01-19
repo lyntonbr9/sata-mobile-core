@@ -5,6 +5,7 @@ import static br.com.lle.sata.util.StringUtil.concat;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -162,6 +163,16 @@ public class HTTPSata {
 			e.printStackTrace();
 		}
 
+		// faz a conversão de UTF-8 para ISO-8859-1 por causa da acentuacao
+		String respostaUTF8;
+		try {
+			respostaUTF8 = new String(content.getBytes(), "UTF-8");
+			content = new String(respostaUTF8.getBytes(), "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return content;
 	}
 	
