@@ -32,7 +32,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	private Map<String, String> nomeEmpresas;
 	
 	// define a quantidade de vencimentos que vai recuperar
-	private int MAX_QTD_SERIES_VENCIMENTOS = 2;
+	private int MAX_QTD_SERIES_VENCIMENTOS = 3;
 	
 	// define o menor volume da opcao
 	private int MIN_QTD_VOLUME_CALL = 1000000;
@@ -103,7 +103,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 		String nomeEmpresa = this.nomeEmpresas.get(codigoAtivo);
 		
 		// remove dias da data atual para a pesquisa
-		Date dataPesq = DataUtil.addDays(-10);
+		Date dataPesq = DataUtil.addDays(-13);
 		// formata para str
 		String dataPesquisa = DataUtil.format(dataPesq, "yyyy-MM-dd");
 //		String dataPesquisa = "2015-07-01";
@@ -389,7 +389,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
-		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", false);
+		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", true);
 		for (CotacaoOpcaoTO co : cotacoes) {
 			log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
 		}
