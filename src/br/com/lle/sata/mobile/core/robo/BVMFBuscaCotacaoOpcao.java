@@ -35,10 +35,12 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	private int MAX_QTD_SERIES_VENCIMENTOS = 3;
 	
 	// define o menor volume da opcao
-	private int MIN_QTD_VOLUME_CALL = 1000000;
+	private int MIN_QTD_VOLUME_CALL_PETR = 500000;
 	
 	// define o menor volume da opcao
-	private int MIN_QTD_VOLUME_PUT = 200000;
+	private int MIN_QTD_VOLUME_PUT_PETR = 100000;
+	
+	private int volumeMinimo = 50000;
 	
 	/*
 	private static VencimentoOpcaoTO vencimentoOpcoes;
@@ -102,11 +104,14 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	
 		String nomeEmpresa = this.nomeEmpresas.get(codigoAtivo);
 		
+		// define o volume minimo caso seja a petrobras
+		if (codigoAtivo.indexOf("PETR") > -1)
+			this.setVolumeMinimo(ehCall ? MIN_QTD_VOLUME_CALL_PETR: MIN_QTD_VOLUME_PUT_PETR);
+		
 		// remove dias da data atual para a pesquisa
 		Date dataPesq = DataUtil.addDays(-13);
 		// formata para str
 		String dataPesquisa = DataUtil.format(dataPesq, "yyyy-MM-dd");
-//		String dataPesquisa = "2015-07-01";
 		
 		Hashtable h = new Hashtable();
 //			h.put("__EVENTTARGET","ctl00$contentPlaceHolderConteudo$posicoesAbertoEmp$lnkLetraP");
@@ -195,7 +200,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">", 19));
 					// recupera o volume
 					int volume = getVolumeFromHtml(htmlOpcao);
-					if (volume >= MIN_QTD_VOLUME_CALL && !codOpcao.contains(" E") && isDataOpcaoValida(dataSerie)) {
+					if (volume >= this.getVolumeMinimo() && !codOpcao.contains(" E") && isDataOpcaoValida(dataSerie)) {
 						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
 						co.setCodigo(codOpcao);
 						co.setPrecoExercicio(String.valueOf(precoExercicio));
@@ -307,7 +312,7 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 					htmlOpcao = htmlOpcao.substring(htmlOpcao.indexOf("<td align=\"right\">", 19));
 					// recupera o volume
 					int volume = getVolumeFromHtml(htmlOpcao);
-					if (volume >= MIN_QTD_VOLUME_PUT && isDataOpcaoValida(dataSerie)) {
+					if (volume >= this.getVolumeMinimo() && isDataOpcaoValida(dataSerie)) {
 						CotacaoOpcaoTO co = new CotacaoOpcaoTO();
 						co.setCodigo(codOpcao.replace(" E", ""));
 						co.setPrecoExercicio(String.valueOf(precoExercicio));
@@ -387,9 +392,18 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	}
 	*/
 	
+	public int getVolumeMinimo() {
+		return volumeMinimo;
+	}
+
+	public void setVolumeMinimo(int volumeMinimo) {
+		this.volumeMinimo = volumeMinimo;
+	}
+
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
-		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", true);
+		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", false);
+		//List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("VALE5", true);
 		for (CotacaoOpcaoTO co : cotacoes) {
 			log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
 		}
