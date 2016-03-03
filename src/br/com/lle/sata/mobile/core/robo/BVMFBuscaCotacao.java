@@ -5,9 +5,9 @@ import static br.com.lle.sata.util.StringUtil.concat;
 
 import java.util.Hashtable;
 
-import br.com.lle.sata.mobile.core.http.HTTPSata;
 import br.com.lle.sata.mobile.core.interfaces.IBuscaCotacao;
 import br.com.lle.sata.mobile.core.to.CotacaoAtivoTO;
+import br.com.lle.sata.util.http.HTTPSata;
 
 public class BVMFBuscaCotacao implements IBuscaCotacao {
 	

@@ -14,11 +14,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import br.com.lle.sata.mobile.core.http.HTTPSata;
 import br.com.lle.sata.mobile.core.interfaces.IBuscaCotacaoOpcao;
 import br.com.lle.sata.mobile.core.to.CotacaoOpcaoTO;
 import br.com.lle.sata.mobile.core.to.comparator.CotacaoOpcaoVolumeComparator;
 import br.com.lle.sata.util.DataUtil;
+import br.com.lle.sata.util.http.HTTPSata;
 
 
 public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
