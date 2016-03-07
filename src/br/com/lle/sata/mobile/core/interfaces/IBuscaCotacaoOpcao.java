@@ -9,5 +9,7 @@ public interface IBuscaCotacaoOpcao {
 	public List<CotacaoOpcaoTO> getCotacoesOpcoes(String codigoAtivo, boolean ehCall);
 	
 	//public VencimentoOpcaoTO getVencimentosOpcoes();
+	
+	public CotacaoOpcaoTO getCotacaoOpcao(String codigoOpcao);
 
 }

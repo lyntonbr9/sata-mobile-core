@@ -1,6 +1,5 @@
 package br.com.lle.sata.mobile.core.robo;
 
-import static br.com.lle.sata.util.LogUtil.log;
 import static br.com.lle.sata.util.StringUtil.concat;
 import static br.com.lle.sata.util.StringUtil.removeExcessoEspacos;
 
@@ -13,6 +12,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import br.com.lle.sata.mobile.core.interfaces.IBuscaCotacaoOpcao;
 import br.com.lle.sata.mobile.core.to.CotacaoOpcaoTO;
@@ -35,12 +36,14 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	private int MAX_QTD_SERIES_VENCIMENTOS = 3;
 	
 	// define o menor volume da opcao
-	private int MIN_QTD_VOLUME_CALL_PETR = 500000;
+	private int MIN_QTD_VOLUME_CALL_PETR = 300000;
 	
 	// define o menor volume da opcao
 	private int MIN_QTD_VOLUME_PUT_PETR = 100000;
 	
 	private int volumeMinimo = 50000;
+	
+	private String[] PUT_SERIES = new String[]{"M","N","O","P","Q","R","S","T","U","V","W","X"};
 	
 	/*
 	private static VencimentoOpcaoTO vencimentoOpcoes;
@@ -392,6 +395,58 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	}
 	*/
 	
+	@Override
+	public CotacaoOpcaoTO getCotacaoOpcao(String codigoOpcao) {
+		
+		CotacaoOpcaoTO co = new CotacaoOpcaoTO();
+		
+		String url = concat("http://br.advfn.com/bolsa-de-valores/bovespa/", codigoOpcao.toUpperCase(), "/cotacao");
+		
+		String html = HTTPSata.GET(url, null);
+		//log(html);
+		Pattern p = Pattern.compile("<td align=\"center\">\\d");
+		Matcher m = p.matcher(html);
+		// busca o preco exercicio
+		m.find();
+		//System.out.println("start: " + m.start() + " end: " + m.end());
+		//System.out.println("sustr: " + html.substring(m.start(), m.end()));
+		int fimTdIndex = html.indexOf("</td>", m.start());
+		// define o preço de exercicio
+		co.setPrecoExercicio(html.substring(m.start() + "<td align=\"center\">".length(), fimTdIndex));
+		System.out.println("dados: " + co.getPrecoExercicio());
+		
+		p = Pattern.compile("\\d\\d\\/\\d\\d\\/\\d\\d");
+		m = p.matcher(html);
+		// busca a data vencimento
+		m.find();
+		//System.out.println("start: " + m.start() + " end: " + m.end());
+		//System.out.println("sustr: " + html.substring(m.start(), m.end()));
+		//fimTdIndex = html.indexOf("</td>", m.start());
+		//String dataVenc = html.substring(m.start() + "<td align=\"center\">".length(), fimTdIndex);
+		String dataVenc = html.substring(m.start(), m.start() + "dd/mm/yy".length());
+		//dataVenc = dataVenc.substring(8,10) + "/" + dataVenc.substring(5,7) + "/" +  dataVenc.substring(0,4);
+		dataVenc = dataVenc.substring(0,6) + "20" + dataVenc.substring(6);
+		co.setDataVencimento(dataVenc);
+		System.out.println("data vencimento: " + co.getDataVencimento());
+		// define o codigo da opcao
+		co.setCodigo(codigoOpcao);
+		// define se é call
+		co.setEhCall(isCall(co.getCodigo()));
+		System.out.println("ehCall: " + co.isEhCall());
+		
+		return co;
+	}
+	
+	private boolean isCall(String codigoOpcao) {
+		String serieOpcao = codigoOpcao.substring(4,5);
+		System.out.println("serieOpcao: " + serieOpcao);
+		for (int i = 0; i < PUT_SERIES.length; i++) {	
+			if(serieOpcao.equalsIgnoreCase(PUT_SERIES[i]))
+				return false;
+		}
+		return true;
+	}
+	
 	public int getVolumeMinimo() {
 		return volumeMinimo;
 	}
@@ -399,15 +454,25 @@ public class BVMFBuscaCotacaoOpcao implements IBuscaCotacaoOpcao {
 	public void setVolumeMinimo(int volumeMinimo) {
 		this.volumeMinimo = volumeMinimo;
 	}
+	
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		BVMFBuscaCotacaoOpcao bbco = new BVMFBuscaCotacaoOpcao();
+		bbco.getCotacaoOpcao("PETRO6");
+	}
+	
 
+	/*
 	public static void main(String[] args) {
 		BVMFBuscaCotacaoOpcao bco = new BVMFBuscaCotacaoOpcao();
 		List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("PETR4", false);
 		//List<CotacaoOpcaoTO> cotacoes = bco.getCotacoesOpcoes("VALE5", true);
 		for (CotacaoOpcaoTO co : cotacoes) {
-			log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
+			LogUtil.log(concat("codOpcao=", co.getCodigo(), "; precoEx=", co.getPrecoExercicio(), "; volume=", co.getVolume(), "; dataVencimento=", co.getDataVencimento()));
 		}
-		log(String.valueOf(cotacoes.size()));
+		LogUtil.log(String.valueOf(cotacoes.size()));
 	}
+	*/
 	
 }
