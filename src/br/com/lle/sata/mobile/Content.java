@@ -1,4 +1,4 @@
-package br.com.lle;
+package br.com.lle.sata.mobile;
 
 import java.io.Serializable;
 import java.util.HashMap;

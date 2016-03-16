@@ -8,20 +8,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import br.com.lle.Content;
-import br.com.lle.POST2GCM;
-import br.com.lle.alert.domain.AvisoStop;
-import br.com.lle.alert.domain.StopAtivo;
-import br.com.lle.alert.domain.UsuarioAlert;
-import br.com.lle.alert.interfaces.INotificacao;
-import br.com.lle.alert.monitor.VerificaStop;
+import br.com.lle.sata.alert.domain.AlertaStop;
+import br.com.lle.sata.alert.domain.AvisoStop;
+import br.com.lle.sata.alert.domain.StopAtivo;
+import br.com.lle.sata.alert.domain.UsuarioAlert;
+import br.com.lle.sata.alert.interfaces.INotificacao;
+import br.com.lle.sata.alert.monitor.VerificaStop;
+import br.com.lle.sata.mobile.Content;
+import br.com.lle.sata.mobile.POST2GCM;
 
+@Deprecated
 public class Notificacao implements INotificacao {
 
 	private final static String SERVER_API_KEY = "AIzaSyAJkI3UGZ2u6hlj3uAIpPFhnJ4X29q5bgw";
     
-//	private final static String[] DISPOSITIVOS_IDS = {"APA91bFlzrQS8tDD7C1ao5YqfbZEsLNyrfymaWhW-a6vm7f3Vde4ufxXp_ods6WGw9WLa6F71pzsqd29GcDTiAMZwV_gXiKvOFSu4fEhxRcMWe3SnMy0WS1pbc17vnMR3yLxkXCf9vxFHzERBdcWRo0yB8Oski6cYopbhBFTpXFKk5A1YRRvlTc"};
-	
 	private static int HORA_COMECO_BVMF = 10; // as 10 horas comeca
 	private static int HORA_FIM_BVMF = 17; // termina as 17 hs
 	private static int QUINZE_MIN_MILIS = 15*60*1000;
@@ -111,7 +111,7 @@ public class Notificacao implements INotificacao {
 		UsuarioAlert usuario = new UsuarioAlert();
 		usuario.setLogin("lyntonbr");
 //		usuario.setRegId("APA91bEwNmmddBDT2W4no_pPwgKXwQoLC0OXzNdaO2H70eoDHMlJ2D24kJtL5WyGJpaYgxw9KuoGbbKXG70mBsp-s3zmHyyFf5_DVK1mp03LvYXnlgS8C1hw01Z8fY_oaB_Q2NnNLfK0rgFpdIAx8CM3XFV_KDQ1rA");
-		usuario.setRegId("APA91bFw7lNnp6qtKiyJCHFwMDXM7OUiRIDe7tlad6RLa9mfrGNEET78Ukz_ck9YEhmkjbw-JG9CqcP_HWDT8CM4X-2UrFx65j7CoSZjnIyIXGkAVqmgWOKyX9fmpG4uOzsXminMiukC3IIdCOAGm4UPN-Uodt47SQ");
+		usuario.setRegId("APA91bEStrVI65Qf8awLjXdAX1VLcmaEpVNAorWF_ZyWC-28txG-EG-bAiLANV4K2oPPyZIrHWBh0-eoL9e7n3bMMzKdE2oTOs7Dco_zDTeExCmEawzE368CRVBqriEaAFBLdxkht9fiSphe-EENecK6B9teVM4Z_Q");
 		List<StopAtivo> stopsAtivo = new ArrayList<StopAtivo>();
         stopsAtivo.add(new StopAtivo("PETR4", "12.20", "13.75", true));
         stopsAtivo.add(new StopAtivo("VALE5", "16.40", "19.28", true));
@@ -130,6 +130,12 @@ public class Notificacao implements INotificacao {
 //        avisosStop.add(avisoStop);
         
 		return avisosStop;
+	}
+
+	@Override
+	public void notificar(UsuarioAlert usuario, String titulo, String msg) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

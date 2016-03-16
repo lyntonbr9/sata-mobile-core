@@ -1,4 +1,4 @@
-package br.com.lle;
+package br.com.lle.sata.mobile;
 
 import static br.com.lle.sata.util.LogUtil.log;
 
